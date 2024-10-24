@@ -1,11 +1,14 @@
 package com.example.ejercicioh;
 
+import Dao.DaoPersona;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import Model.Persona;
+
+import java.sql.SQLException;
 
 /**
  * Controlador para la ventana modal que permite agregar o editar una persona.
@@ -23,6 +26,7 @@ public class ejercicioHModalController {
 
     private ObservableList<Persona> personasList;
     private Persona personaAEditar = null; // Referencia a la persona a editar, si existe
+    private DaoPersona daoPersona;
     private boolean esModificacion = false;
 
     /**
@@ -32,6 +36,15 @@ public class ejercicioHModalController {
      */
     public void setPersonasList(ObservableList<Persona> personasList) {
         this.personasList = personasList;
+    }
+
+    /**
+     * Establece el DAO para las operaciones de base de datos.
+     *
+     * @param daoPersona El DAO de Persona.
+     */
+    public void setDaoPersona(DaoPersona daoPersona) {
+        this.daoPersona = daoPersona;
     }
 
     /**
@@ -58,8 +71,8 @@ public class ejercicioHModalController {
     }
 
     /**
-     * Método que maneja el evento de agregar o editar una persona. Este método es llamado cuando
-     * se pulsa el botón "Guardar" en la ventana modal.
+     * Método que maneja el evento de agregar o editar una persona.
+     * Este método es llamado cuando se pulsa el botón "Guardar" en la ventana modal.
      */
     @FXML
     private void aniadirPersona() {
@@ -90,26 +103,34 @@ public class ejercicioHModalController {
             return;
         }
 
-        if (esModificacion && personaAEditar != null) {
-            // Si estamos modificando, actualizamos los valores de la persona existente
-            personaAEditar.setNombre(nombre);
-            personaAEditar.setApellido(apellidos);
-            personaAEditar.setEdad(edad);
+        try {
+            if (esModificacion && personaAEditar != null) {
+                // Si estamos modificando, actualizamos los valores de la persona existente en la base de datos
+                personaAEditar.setNombre(nombre);
+                personaAEditar.setApellido(apellidos);
+                personaAEditar.setEdad(edad);
+                daoPersona.modificar(personaAEditar);
 
-            // Mostrar el mensaje de éxito
-            mostrarInformacion("Persona modificada con éxito.");
-        } else {
-            // Verificar que la persona no sea duplicada antes de agregarla
-            Persona nuevaPersona = new Persona(nombre, apellidos, edad);
-            for (Persona persona : personasList) {
-                if (persona.equals(nuevaPersona)) {
-                    mostrarError("Persona duplicada: Ya existe una persona con los mismos datos.");
-                    return;
+                // Mostrar el mensaje de éxito
+                mostrarInformacion("Persona modificada con éxito.");
+            } else {
+                // Verificar que la persona no sea duplicada antes de agregarla
+                Persona nuevaPersona = new Persona(0, nombre, apellidos, edad);
+                for (Persona persona : personasList) {
+                    if (persona.equals(nuevaPersona)) {
+                        mostrarError("Persona duplicada: Ya existe una persona con los mismos datos.");
+                        return;
+                    }
                 }
+
+                // Agregar la nueva persona a la base de datos
+                daoPersona.agregar(nuevaPersona);
+                // Recargar las personas desde la BD en la ventana principal
+                personasList.add(nuevaPersona);
+                mostrarInformacion("Persona agregada con éxito.");
             }
-            // Agregar la nueva persona si no es duplicada
-            personasList.add(nuevaPersona);
-            mostrarInformacion("Persona agregada con éxito.");
+        } catch (SQLException e) {
+            mostrarError("Error al interactuar con la base de datos: " + e.getMessage());
         }
 
         // Cerrar la ventana modal
