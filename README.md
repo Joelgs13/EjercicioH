@@ -1,0 +1,1 @@
+A comparacion del programa anterior, en este se eliminaron los botones y funciones de la importacion/exportacion de CSV. Ademas, se ajusto para que ahora trabaje con una BBDD de mariaDB en docker y con ejecucion grafica en el Mysql workbrench. Los objetos persona se pasan a la tabla personas de la bbdd y se gestionan desde ahi, pudiendo agregar, editar o quitar 1 persona.
