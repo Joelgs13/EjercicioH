@@ -7,13 +7,21 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Clase de acceso a datos para la entidad {@link Persona}.
+ * Proporciona métodos para realizar operaciones CRUD (Crear, Leer, Actualizar, Eliminar)
+ * en la tabla "Persona" de la base de datos.
+ */
 public class DaoPersona {
 
+    /**
+     * Obtiene todas las personas de la base de datos.
+     *
+     * @return Una lista de objetos {@link Persona} que representan todas las personas en la base de datos.
+     * @throws SQLException si ocurre un error al acceder a la base de datos.
+     */
     public List<Persona> obtenerTodas() throws SQLException {
-        // Crear una instancia de ConexionBBDD
-        ConexionBBDD conn = new ConexionBBDD();
-        // Obtener la conexión de la instancia
-        Connection conexion = conn.getConnection();
+        Connection conexion = new ConexionBBDD().getConnection();
         List<Persona> personas = new ArrayList<>();
         String query = "SELECT * FROM Persona";
 
@@ -30,17 +38,20 @@ public class DaoPersona {
                 personas.add(persona);
             }
         } finally {
-            // Asegúrate de cerrar la conexión al final
-            conn.CloseConexion();
+            new ConexionBBDD().CloseConexion();
         }
 
         return personas;
     }
 
+    /**
+     * Agrega una nueva persona a la base de datos.
+     *
+     * @param persona La persona a agregar.
+     * @throws SQLException si ocurre un error al acceder a la base de datos.
+     */
     public void agregar(Persona persona) throws SQLException {
-        // Crear una instancia de ConexionBBDD
-        ConexionBBDD conn = new ConexionBBDD();
-        Connection conexion = conn.getConnection();
+        Connection conexion = new ConexionBBDD().getConnection();
         String query = "INSERT INTO Persona (nombre, apellidos, edad) VALUES (?, ?, ?)";
 
         try (PreparedStatement statement = conexion.prepareStatement(query)) {
@@ -49,15 +60,18 @@ public class DaoPersona {
             statement.setInt(3, persona.getEdad());
             statement.executeUpdate();
         } finally {
-            // Asegúrate de cerrar la conexión al final
-            conn.CloseConexion();
+            new ConexionBBDD().CloseConexion();
         }
     }
 
+    /**
+     * Modifica los datos de una persona existente en la base de datos.
+     *
+     * @param persona La persona con los datos actualizados.
+     * @throws SQLException si ocurre un error al acceder a la base de datos.
+     */
     public void modificar(Persona persona) throws SQLException {
-        // Crear una instancia de ConexionBBDD
-        ConexionBBDD conn = new ConexionBBDD();
-        Connection conexion = conn.getConnection();
+        Connection conexion = new ConexionBBDD().getConnection();
         String query = "UPDATE Persona SET nombre = ?, apellidos = ?, edad = ? WHERE id = ?";
 
         try (PreparedStatement statement = conexion.prepareStatement(query)) {
@@ -67,23 +81,25 @@ public class DaoPersona {
             statement.setInt(4, persona.getId());
             statement.executeUpdate();
         } finally {
-            // Asegúrate de cerrar la conexión al final
-            conn.CloseConexion();
+            new ConexionBBDD().CloseConexion();
         }
     }
 
+    /**
+     * Elimina una persona de la base de datos según su ID.
+     *
+     * @param id El ID de la persona a eliminar.
+     * @throws SQLException si ocurre un error al acceder a la base de datos.
+     */
     public void eliminar(int id) throws SQLException {
-        // Crear una instancia de ConexionBBDD
-        ConexionBBDD conn = new ConexionBBDD();
-        Connection conexion = conn.getConnection();
+        Connection conexion = new ConexionBBDD().getConnection();
         String query = "DELETE FROM Persona WHERE id = ?";
 
         try (PreparedStatement statement = conexion.prepareStatement(query)) {
             statement.setInt(1, id);
             statement.executeUpdate();
         } finally {
-            // Asegúrate de cerrar la conexión al final
-            conn.CloseConexion();
+            new ConexionBBDD().CloseConexion();
         }
     }
 }

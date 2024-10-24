@@ -12,6 +12,8 @@ import java.sql.SQLException;
 
 /**
  * Controlador para la ventana modal que permite agregar o editar una persona.
+ * Maneja la entrada del usuario y las interacciones con la base de datos
+ * para realizar operaciones sobre los datos de las personas.
  */
 public class ejercicioHModalController {
 
@@ -24,15 +26,15 @@ public class ejercicioHModalController {
     @FXML
     private TextField edadField;
 
-    private ObservableList<Persona> personasList;
+    private ObservableList<Persona> personasList; // Lista de personas a modificar o agregar
     private Persona personaAEditar = null; // Referencia a la persona a editar, si existe
-    private DaoPersona daoPersona;
-    private boolean esModificacion = false;
+    private DaoPersona daoPersona; // Objeto DAO para realizar operaciones de base de datos
+    private boolean esModificacion = false; // Indica si se está modificando una persona existente
 
     /**
      * Establece la lista de personas a la que se agregará o modificará la persona.
      *
-     * @param personasList Lista de personas.
+     * @param personasList Lista de personas que se están gestionando.
      */
     public void setPersonasList(ObservableList<Persona> personasList) {
         this.personasList = personasList;
@@ -41,7 +43,7 @@ public class ejercicioHModalController {
     /**
      * Establece el DAO para las operaciones de base de datos.
      *
-     * @param daoPersona El DAO de Persona.
+     * @param daoPersona El DAO que gestiona las operaciones sobre la entidad Persona.
      */
     public void setDaoPersona(DaoPersona daoPersona) {
         this.daoPersona = daoPersona;
@@ -49,18 +51,19 @@ public class ejercicioHModalController {
 
     /**
      * Establece la persona que se va a editar.
-     * Si se llama a este método, se sobreescribe la persona seleccionada y el modal se comportará como un editor.
+     * Si se llama a este método, se sobreescribe la persona seleccionada
+     * y el modal se comportará como un editor en lugar de un formulario de creación.
      *
      * @param persona Persona cuyos datos se van a editar.
      */
     public void setPersonaAEditar(Persona persona) {
         this.personaAEditar = persona;
-        this.esModificacion = true;
-        rellenarCampos(persona); // Rellenar los campos con la persona a editar
+        this.esModificacion = true; // Indicador de que se está en modo edición
+        rellenarCampos(persona); // Rellenar los campos con los datos de la persona a editar
     }
 
     /**
-     * Rellena los campos de texto con los datos de una persona existente para editarla.
+     * Rellena los campos de texto con los datos de una persona existente para permitir su edición.
      *
      * @param persona Persona cuyos datos se van a editar.
      */
@@ -73,14 +76,16 @@ public class ejercicioHModalController {
     /**
      * Método que maneja el evento de agregar o editar una persona.
      * Este método es llamado cuando se pulsa el botón "Guardar" en la ventana modal.
+     * Valida los campos de entrada y realiza la operación correspondiente en la base de datos.
      */
     @FXML
     private void aniadirPersona() {
         String nombre = nombreField.getText().trim();
         String apellidos = apellidosField.getText().trim();
         String edadText = edadField.getText().trim();
-        StringBuilder errores = new StringBuilder();
+        StringBuilder errores = new StringBuilder(); // Acumula los mensajes de error de validación
 
+        // Validaciones de entrada
         if (nombre.isEmpty()) {
             errores.append("El campo 'Nombre' no puede estar vacío.\n");
         }
@@ -98,6 +103,7 @@ public class ejercicioHModalController {
             errores.append("El campo 'Edad' debe ser un número entero válido.\n");
         }
 
+        // Si hay errores, se muestran y se aborta la operación
         if (errores.length() > 0) {
             mostrarError(errores.toString());
             return;
@@ -105,7 +111,7 @@ public class ejercicioHModalController {
 
         try {
             if (esModificacion && personaAEditar != null) {
-                // Si estamos modificando, actualizamos los valores de la persona existente en la base de datos
+                // Si estamos modificando, actualizamos los datos de la persona existente en la base de datos
                 personaAEditar.setNombre(nombre);
                 personaAEditar.setApellido(apellidos);
                 personaAEditar.setEdad(edad);
@@ -114,7 +120,7 @@ public class ejercicioHModalController {
                 // Mostrar el mensaje de éxito
                 mostrarInformacion("Persona modificada con éxito.");
             } else {
-                // Verificar que la persona no sea duplicada antes de agregarla
+                // Verificar que la nueva persona no sea duplicada antes de agregarla
                 Persona nuevaPersona = new Persona(0, nombre, apellidos, edad);
                 for (Persona persona : personasList) {
                     if (persona.equals(nuevaPersona)) {
@@ -125,7 +131,7 @@ public class ejercicioHModalController {
 
                 // Agregar la nueva persona a la base de datos
                 daoPersona.agregar(nuevaPersona);
-                // Recargar las personas desde la BD en la ventana principal
+                // Agregar la nueva persona a la lista observable
                 personasList.add(nuevaPersona);
                 mostrarInformacion("Persona agregada con éxito.");
             }
@@ -133,34 +139,34 @@ public class ejercicioHModalController {
             mostrarError("Error al interactuar con la base de datos: " + e.getMessage());
         }
 
-        // Cerrar la ventana modal
+        // Cerrar la ventana modal después de completar la operación
         cerrarVentana();
     }
 
     /**
      * Muestra un mensaje de éxito en una alerta emergente.
      *
-     * @param mensaje Mensaje de éxito a mostrar.
+     * @param mensaje Mensaje de éxito a mostrar en la alerta.
      */
     private void mostrarInformacion(String mensaje) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Éxito");
         alert.setHeaderText(null);
         alert.setContentText(mensaje);
-        alert.showAndWait();
+        alert.showAndWait(); // Muestra la alerta y espera a que el usuario la cierre
     }
 
     /**
      * Muestra un mensaje de error en una alerta emergente.
      *
-     * @param mensaje Mensaje de error a mostrar.
+     * @param mensaje Mensaje de error a mostrar en la alerta.
      */
     private void mostrarError(String mensaje) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Error en los datos");
         alert.setHeaderText(null);
         alert.setContentText(mensaje);
-        alert.showAndWait();
+        alert.showAndWait(); // Muestra la alerta y espera a que el usuario la cierre
     }
 
     /**
@@ -168,7 +174,7 @@ public class ejercicioHModalController {
      */
     @FXML
     private void cerrarVentana() {
-        Stage stage = (Stage) nombreField.getScene().getWindow();
-        stage.close();
+        Stage stage = (Stage) nombreField.getScene().getWindow(); // Obtiene la ventana actual
+        stage.close(); // Cierra la ventana
     }
 }

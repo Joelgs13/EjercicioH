@@ -18,8 +18,10 @@ import java.sql.SQLException;
 import java.util.List;
 
 /**
- * Controlador que maneja la ventana principal con la lista de personas.
- * Permite agregar, modificar, eliminar y filtrar personas, cargando los datos desde una base de datos.
+ * Controlador que maneja la interfaz de usuario de la aplicación.
+ * Permite la gestión de una lista de personas, incluyendo operaciones
+ * para agregar, modificar, eliminar y filtrar personas, utilizando
+ * datos obtenidos de una base de datos.
  */
 public class ejercicioHController {
 
@@ -51,7 +53,8 @@ public class ejercicioHController {
     private DaoPersona daoPersona = new DaoPersona();
 
     /**
-     * Inicializa la tabla y carga los datos desde la base de datos.
+     * Inicializa el controlador, configurando las columnas de la tabla
+     * y cargando los datos de las personas desde la base de datos.
      */
     @FXML
     public void initialize() {
@@ -59,26 +62,27 @@ public class ejercicioHController {
         apellidosColumn.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(cellData.getValue().getApellido()));
         edadColumn.setCellValueFactory(cellData -> new javafx.beans.property.SimpleIntegerProperty(cellData.getValue().getEdad()).asObject());
 
-        // Cargar datos desde la base de datos
         cargarPersonasDesdeBD();
     }
 
     /**
-     * Carga las personas desde la base de datos y las añade a la lista.
+     * Carga las personas desde la base de datos y las añade a la lista observable.
+     * En caso de error durante la carga, muestra un mensaje de alerta.
      */
     private void cargarPersonasDesdeBD() {
         try {
             List<Persona> personas = daoPersona.obtenerTodas();
-            personasList.setAll(personas); // Actualiza la lista con las personas obtenidas de la base de datos
-            personTable.setItems(personasList);
+            personasList.setAll(personas); // Actualiza la lista observable con los datos obtenidos
+            personTable.setItems(personasList); // Asigna la lista a la tabla
         } catch (SQLException e) {
             mostrarAlerta("Error", "No se pudieron cargar los datos desde la base de datos: " + e.getMessage());
         }
     }
 
     /**
-     * Método que abre una ventana modal para agregar o modificar una persona
-     * dependiendo del botón que se haya pulsado.
+     * Abre una ventana modal para agregar o modificar una persona.
+     * Dependiendo del botón que se haya pulsado (Agregar o Modificar),
+     * se configura la ventana modal adecuadamente.
      *
      * @param event Evento disparado por los botones "Agregar Persona" o "Modificar Persona".
      */
@@ -104,23 +108,24 @@ public class ejercicioHController {
                     return;
                 }
                 modalStage.setTitle("Editar Persona");
-                modalController.setPersonaAEditar(personaSeleccionada);
+                modalController.setPersonaAEditar(personaSeleccionada); // Configura la persona a editar
             }
 
             modalStage.setScene(new Scene(modalRoot));
             modalStage.showAndWait();
 
-            // Recargar la tabla después de agregar o modificar
             cargarPersonasDesdeBD();
 
         } catch (IOException e) {
-            e.printStackTrace();
+            mostrarAlerta("Error", "No se pudo abrir la ventana: " + e.getMessage());
         }
     }
 
     /**
-     * Método que elimina una persona seleccionada de la tabla.
+     * Elimina la persona seleccionada de la tabla.
      * Si no hay una persona seleccionada, muestra un mensaje de alerta.
+     *
+     * @param event Evento disparado por el botón "Eliminar Persona".
      */
     @FXML
     private void eliminarPersona(ActionEvent event) {
@@ -130,7 +135,7 @@ public class ejercicioHController {
         } else {
             try {
                 daoPersona.eliminar(personaSeleccionada.getId());
-                personasList.remove(personaSeleccionada);
+                personasList.remove(personaSeleccionada); // Actualiza la lista observable eliminando la persona
                 mostrarAlerta("Persona eliminada", "La persona ha sido eliminada con éxito.");
             } catch (SQLException e) {
                 mostrarAlerta("Error", "No se pudo eliminar la persona: " + e.getMessage());
@@ -142,30 +147,33 @@ public class ejercicioHController {
      * Muestra una alerta con el título y el mensaje especificado.
      *
      * @param titulo El título de la alerta.
-     * @param mensaje El mensaje de la alerta.
+     * @param mensaje El mensaje a mostrar en la alerta.
      */
     private void mostrarAlerta(String titulo, String mensaje) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(titulo);
         alert.setHeaderText(null);
         alert.setContentText(mensaje);
-        alert.showAndWait();
+        alert.showAndWait(); // Muestra la alerta y espera a que el usuario la cierre
     }
 
     /**
      * Filtra las personas en la tabla según el texto ingresado en el campo de filtro.
+     * Actualiza la vista de la tabla para mostrar solo las personas que coincidan
+     * con el criterio de búsqueda.
      */
     public void filtrar() {
         String textoFiltro = filtrarField.getText().toLowerCase();
 
         ObservableList<Persona> personasFiltradas = FXCollections.observableArrayList();
 
+        // Filtrar la lista de personas según el nombre
         for (Persona persona : personasList) {
             if (persona.getNombre().toLowerCase().contains(textoFiltro)) {
                 personasFiltradas.add(persona);
             }
         }
 
-        personTable.setItems(personasFiltradas);
+        personTable.setItems(personasFiltradas); // Actualiza la tabla con la lista filtrada
     }
 }
