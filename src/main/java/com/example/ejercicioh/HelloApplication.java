@@ -15,7 +15,7 @@ import java.io.IOException;
 public class HelloApplication extends Application {
 
     /**
-     * Método que se llama al iniciar la aplicación.
+     * Metodo que se llama al iniciar la aplicación.
      * Carga el archivo FXML, configura la escena y el escenario, y muestra la ventana.
      *
      * @param stage El escenario principal de la aplicación.
@@ -36,8 +36,8 @@ public class HelloApplication extends Application {
     }
 
     /**
-     * Método principal de la aplicación.
-     * Llama al método {@link #start(Stage)} para iniciar la aplicación.
+     * Metodo principal de la aplicación.
+     * Llama al metodo {@link #start(Stage)} para iniciar la aplicación.
      *
      * @param args Argumentos de línea de comandos (no utilizados).
      */

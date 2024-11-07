@@ -1,5 +1,6 @@
 package com.example.ejercicioh;
 
+import BBDD.ConexionBBDD;
 import Dao.DaoPersona;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -112,6 +113,7 @@ public class ejercicioHController {
             }
 
             modalStage.setScene(new Scene(modalRoot));
+            modalStage.setResizable(false);
             modalStage.showAndWait();
 
             cargarPersonasDesdeBD();

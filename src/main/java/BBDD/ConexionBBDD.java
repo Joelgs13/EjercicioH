@@ -31,6 +31,7 @@ public class ConexionBBDD {
         connConfig.setProperty("user", "root");
         connConfig.setProperty("password", "mypass");
 
+
         // Establecer la conexión a la base de datos con los parámetros especificados
         connection = DriverManager.getConnection(
                 "jdbc:mariadb://127.0.0.1:33066/personas?serverTimezone=Europe/Madrid",
